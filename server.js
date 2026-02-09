@@ -23,5 +23,5 @@ const server = http.createServer((request, response) =>{
 const PORT = 4500;
 
 server.listen(PORT, ()=>{
-  console.log(`server is running https://localhost:${PORT}`)
+  console.log(`server is running http://localhost:${PORT}`)
 })

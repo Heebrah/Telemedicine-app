@@ -1,0 +1,16 @@
+###
+GET http://localhost:3500/createTable
+Content-Type: application/json
+
+###
+POST http://localhost:3500/addDoctor
+Content-Type: application/json
+
+{
+  "first_name": "Keith",
+  "last_name": "Darry",
+  "password": "secu",
+  "specialisation": "Cardiology",
+  "phone": "1234567890",
+  "schedule": "2024-08-09 15:00:00"
+}
