@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Patient Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f4f6fb;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      color: #fff;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .navbar h2 {
+      font-size: 20px;
+    }
+
+    .navbar button {
+      background: #fff;
+      color: #4f46e5;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .navbar button:hover {
+      background: #e0e7ff;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* Cards */
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      margin-bottom: 15px;
+    }
+
+    /* Profile text */
+    .card p {
+      margin-bottom: 8px;
+      color: #444;
+    }
+
+    /* Grid actions */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .box {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .box:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Form */
+    .input-group {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    .input-group i {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 10px 10px 10px 35px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 5px rgba(79,70,229,0.3);
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #4f46e5;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button[type="submit"]:hover {
+      background: #4338ca;
+    }
+
+    /* Hidden section */
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <h2>Patient Dashboard</h2>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+
+  <!-- Profile -->
+  <div class="card">
+    <h3>Profile</h3>
+    <p><strong>Name:</strong> <span id="name"></span></p>
+    <p><strong>Email:</strong> <span id="email"></span></p>
+    <p><strong>Phone:</strong> <span id="phone"></span></p>
+  </div>
+
+  <!-- Actions -->
+  <div class="grid">
+    <div class="box" onclick="showBooking()">
+      <i class="fa fa-calendar-plus"></i><br><br>
+      Book Appointment
+    </div>
+
+    <div class="box">
+      <i class="fa fa-list"></i><br><br>
+      View Appointments
+    </div>
+  </div>
+
+  <!-- Booking -->
+  <div id="bookingSection" class="card hidden">
+    <h3>Book Appointment</h3>
+
+    <form id="appointmentForm">
+
+      <div class="input-group">
+        <i class="fa fa-user-doctor"></i>
+        <select id="doctor_id" required>
+          <option value="">Select Doctor</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <i class="fa fa-calendar"></i>
+        <input type="date" id="appointment_date" required>
+      </div>
+
+      <div class="input-group">
+        <i class="fa fa-clock"></i>
+        <input type="time" id="appointment_time" required>
+      </div>
+
+      <button type="submit">Book</button>
+
+    </form>
+  </div>
+
+</div>
+
+
+</body>
+
+<script>
+const user = JSON.parse(localStorage.getItem('user'));
+
+ function showBooking() {
+    document.getElementById('bookingSection').classList.toggle('hidden');
+  }
+  
+if (!user) {
+  window.location.href = "login.html";
+}
+
+// Populate profile
+document.getElementById('name').textContent = user.first_name + " " + user.last_name;
+document.getElementById('email').textContent = user.email;
+document.getElementById('phone').textContent = user.phone;
+
+// Show booking form
+function showBooking() {
+  document.getElementById('bookingSection').classList.remove('hidden');
+  loadDoctors();
+}
+
+// Load doctors into dropdown
+function loadDoctors() {
+  fetch('http://localhost:3500/api/doctors')
+    .then(res => res.json())
+    .then(data => {
+      const select = document.getElementById('doctor_id');
+      select.innerHTML = '<option value="">Select Doctor</option>';
+
+      data.forEach(doc => {
+        const option = document.createElement('option');
+        option.value = doc.id;
+        option.textContent = doc.first_name + " " + doc.last_name + " (" + doc.specialisation + ")";
+        select.appendChild(option);
+      });
+    });
+}
+
+// Submit appointment
+document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  fetch('http://localhost:3500/api/appointments', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      patient_id: user.id,
+      doctor_id: document.getElementById('doctor_id').value,
+      appointment_date: document.getElementById('appointment_date').value,
+      appointment_time: document.getElementById('appointment_time').value
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Appointment booked successfully");
+      document.getElementById('appointmentForm').reset();
+    } else {
+      alert("Error: " + data.message);
+    }
+  });
+});
+
+// Logout
+function logout() {
+  localStorage.removeItem('user');
+  window.location.href = "login.html";
+}
+</script>
+
+
+</html>

@@ -4,24 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <style>
+    body{
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    h1{
+      text-align: center;
+      color: #333;
+    }
+    form{
+      width: 25%;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input{
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    button{
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h1>Medical App</h1>
   <form onsubmit="patients(e)">
-    <input type="text"><br>
-    <input type="text"><br>
+    <label for="name">Patient Name</label>
+    <input type="text" id="name"><br>
+    <label for="age">Age</label>
+    <input type="text" id="age"><br>
+    
+
+    <label for="password">Password</label>
     <input type="password" name="" id="fg"><br>
+    
+    <label for="email">Email</label>
     <input type="email" name="" id="sd"><br>
+    <label for="phone">Phone Number</label>
     <input type="number" name="" id="sds"><br>
     <input type="date" name="" id="ere"><br>
-    <input type="radio" name="" id="ad"><br>
-    <input type="radio" name="" id="afd"><br>
     <input type="text">
     <button type="submit">submit</button>
   </form>
-  <button>doctor</button>
-  <button>appointments</button>
-  <button>admin</button>
+  <div>
+    <button>doctor</button>
+    <button>appointments</button>
+    <button>admin</button>
+  </div>
 
 
   <script src="index.js"></script>

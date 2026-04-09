@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Appointment</title>
+
+<head>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #fff;
+      padding: 35px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    .input-group i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 12px 12px 12px 38px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      transition: 0.3s;
+      background: #fff;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 6px rgba(79,70,229,0.3);
+    }
+
+    /* validation */
+    input:valid, select:valid {
+      border-color: #10b981;
+    }
+
+    input:invalid:not(:placeholder-shown),
+    select:invalid {
+      border-color: #ef4444;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #4f46e5;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #4338ca;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>Book Appointment</h2>
+
+    <form id="appointmentForm">
+
+      <div class="input-group">
+        <i class="fa fa-user-doctor"></i>
+        <select id="doctor_id" required>
+          <option value="">Select Doctor</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <i class="fa fa-calendar"></i>
+        <input type="date" id="appointment_date" required>
+      </div>
+
+      <div class="input-group">
+        <i class="fa fa-clock"></i>
+        <input type="time" id="appointment_time" required>
+      </div>
+
+      <button type="submit">Book Appointment</button>
+
+    </form>
+  </div>
+</body>
+
+<script>
+  const form = document.getElementById('appointmentForm');
+const user = JSON.parse(localStorage.getItem('user'));
+
+if (!user) {
+  window.location.href = "login.html";
+}
+
+// LOAD DOCTORS
+fetch('http://localhost:3500/api/doctors')
+  .then(res => res.json())
+  .then(data => {
+    const select = document.getElementById('doctor_id');
+
+    data.forEach(doctor => {
+      const option = document.createElement('option');
+      option.value = doctor.id;
+      option.textContent = doctor.first_name + " " + doctor.last_name + " (" + doctor.specialisation + ")";
+      select.appendChild(option);
+    });
+  });
+
+// SUBMIT
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const doctorId = parseInt(document.getElementById('doctor_id').value);
+  const date = document.getElementById('appointment_date').value;
+  const time = document.getElementById('appointment_time').value;
+
+  if (!doctorId || !date || !time) {
+    alert("All fields are required");
+    return;
+  }
+
+  const formattedTime = time.length === 5 ? time + ":00" : time;
+
+  console.log({ doctorId, date, formattedTime });
+
+  fetch('http://localhost:3500/api/appointments', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      patient_id: user.id,
+      doctor_id: doctorId,
+      appointment_date: date,
+      appointment_time: formattedTime,
+      status: "pending"
+    })
+  })
+  .then(res => {
+    console.log("Status:", res.status);
+    return res.json();
+  })
+  .then(data => {
+    console.log(data);
+
+    if (data.success) {
+      alert("Appointment booked successfully");
+      form.reset();
+      document.getElementById('doctor_id').selectedIndex = 0;
+    } else {
+      alert("Error: " + (data.message || "Unknown error"));
+    }
+  })
+  .catch(err => console.error(err));
+});
+</script>
+
+
+</html>

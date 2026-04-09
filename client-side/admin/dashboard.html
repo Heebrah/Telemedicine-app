@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: flex;
+      background: #f4f6fb;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: linear-gradient(180deg, #4f46e5, #06b6d4);
+      color: white;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 30px;
+    }
+
+    .sidebar button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .sidebar button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 25px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .header button {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+    }
+
+    tr:hover {
+      background: #f1f5f9;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+
+    .profile-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-item span {
+  color: #666;
+}
+
+.profile-item strong {
+  color: #111;
+}
+
+/* reuse existing .card, .input-group, button styles */
+
+.input-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+
+.input-group i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  width: 20px;
+}
+
+.input-group input,
+.input-group select {
+  width: 80%;
+  padding: 10px 10px 10px 35px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+
+
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 5px rgba(79,70,229,0.3);
+}
+
+.creatButton {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+  </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>Admin</h2>
+  <button onclick="loadProfile()"><i class="fa fa-user"></i> My Profile</button>
+  <button onclick="loadAdmins()"><i class="fa fa-user-shield"></i> Admins</button>
+  <button onclick="loadPatients()"><i class="fa fa-users"></i> Patients</button>
+  <button onclick="loadDoctors()"><i class="fa fa-user-doctor"></i> Doctors</button>
+  <button onclick="loadAppointments()"><i class="fa fa-calendar"></i> Appointments</button>
+  <button onclick="createAdmin()"><i class="fa fa-user-plus"></i> Create Admin</button>
+</div>
+
+<div class="main">
+
+  <div class="header">
+    <h1>Dashboard</h1>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div id="content" class="card">
+    <p>Select a section from the left menu</p>
+  </div>
+
+</div>
+
+
+
+</body>
+<script>
+  const content = document.getElementById('content');
+let admin = null;
+const token = localStorage.getItem('token');
+
+
+
+// ------------------------
+// AUTH CHECK
+// ------------------------
+async function checkAuth() {
+  if (!token) return redirectLogin();
+
+  try {
+    const res = await fetch('http://localhost:3500/api/admins/profile', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) return redirectLogin();
+
+    const data = await res.json();
+    admin = data.admin;
+
+    // Load profile by default
+    loadProfile();
+
+  } catch {
+    redirectLogin();
+  }
+}
+
+function redirectLogin() {
+  localStorage.removeItem('token');
+  window.location.replace('login.html');
+}
+
+// ------------------------
+// FETCH WITH TOKEN
+// ------------------------
+async function fetchWithAuth(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {})
+    }
+  });
+}
+
+// ------------------------
+// UI HELPERS
+// ------------------------
+function showLoading() {
+  content.innerHTML = '<div class="loading">Loading...</div>';
+}
+
+function renderTable(headers, rows) {
+  let table = '<table><thead><tr>';
+  headers.forEach(h => table += `<th>${h}</th>`);
+  table += '</tr></thead><tbody>';
+
+  rows.forEach(row => {
+    table += '<tr>';
+    row.forEach(cell => table += `<td>${cell}</td>`);
+    table += '</tr>';
+  });
+
+  table += '</tbody></table>';
+  content.innerHTML = table;
+}
+
+// ------------------------
+// PROFILE
+// ------------------------
+async function loadProfile() {
+  showLoading();
+  try {
+    const res = await fetchWithAuth('http://localhost:3500/api/admins/profile');
+    if (!res.ok) throw new Error('Failed to load profile');
+
+    const data = await res.json();
+    const a = data; 
+content.innerHTML = `
+  <div class="card">
+    <h2>My Profile</h2>
+    <p><strong>Username:</strong> ${a.username}</p>
+    <p><strong>Role:</strong> ${a.role}</p>
+  </div>
+`;
+
+  } catch {
+    content.innerHTML = 'Error loading profile';
+  }
+}
+
+// ------------------------
+// ADMINS
+// ------------------------
+async function loadAdmins() {
+  showLoading();
+  try {
+    const res = await fetchWithAuth('http://localhost:3500/api/admins');
+    if (!res.ok) throw new Error('Failed to load admins');
+    const data = await res.json();
+
+    const rows = data.map(a => [
+      a.id,
+      a.username,
+      a.role,
+      `<button onclick="updateAdmin(${a.id}, '${a.username}', '${a.role}')">Edit</button>`,
+      `<button onclick="deleteAdmin(${a.id})">Delete</button>`
+    ]);
+
+    renderTable(['ID', 'Username', 'Role', 'Edit', 'Delete'], rows);
+
+  } catch {
+    content.innerHTML = 'Error loading admins';
+  }
+}
+
+async function deleteAdmin(id) {
+  if (!confirm('Delete this admin?')) return;
+  try {
+    await fetchWithAuth(`http://localhost:3500/api/admins/${id}`, { method: 'DELETE' });
+    loadAdmins();
+  } catch {
+    alert('Delete failed');
+  }
+}
+
+// ------------------------
+// PATIENTS
+// ------------------------
+async function loadPatients() {
+  showLoading();
+  try {
+    const res = await fetchWithAuth('http://localhost:3500/api/patients');
+    if (!res.ok) throw new Error('Failed to load patients');
+    const data = await res.json();
+    const patients = data.patients;
+
+    const rows = patients.map(p => [
+     p.id,
+    `${p.first_name} ${p.last_name}`,
+     p.email,
+      p.phone,
+      p.date_of_birth
+    ]);
+
+    renderTable(['ID', 'Name', 'Email', 'Phone', 'Date of Birth'], rows);
+
+  } catch {
+    content.innerHTML = 'Error loading patients';
+  }
+}
+
+// ------------------------
+// DOCTORS
+// ------------------------
+async function loadDoctors() {
+  showLoading();
+  try {
+    const res = await fetchWithAuth('http://localhost:3500/api/doctors');
+    if (!res.ok) throw new Error('Failed to load doctors');
+    const data = await res.json();
+
+    const rows = data.map(d => [
+      d.id,
+      `${d.first_name} ${d.last_name}`,
+      d.specialization,
+      d.email,
+      d.phone
+    ]);
+
+    renderTable(['ID','Name','Specialization','Email','Phone'], rows);
+
+  } catch {
+    content.innerHTML = 'Error loading doctors';
+  }
+}
+
+// ------------------------
+// APPOINTMENTS
+// ------------------------
+async function loadAppointments() {
+  showLoading();
+  try {
+    const res = await fetchWithAuth('http://localhost:3500/api/appointments');
+    if (!res.ok) throw new Error('Failed to load appointments');
+    const data = await res.json();
+    const appointments = data.appointments;
+
+    const rows = appointments.map(a => [
+      a.id,
+      `${a.patient_first_name} ${a.patient_last_name}`,
+      `${a.doctor_first_name} ${a.doctor_last_name}`,
+      a.appointment_date,
+      a.appointment_time,
+      a.status
+    ]);
+
+    renderTable(['ID','Patient','Doctor','Date','Time','Status'], rows);
+
+  } catch {
+    content.innerHTML = 'Error loading appointments';
+  }
+}
+
+// ------------------------
+// LOGOUT
+// ------------------------
+function logout() {
+  localStorage.removeItem('token');
+  window.location.replace('login.html');
+}
+
+// ------------------------
+// INIT
+// ------------------------
+
+function createAdmin() {
+  fetchWithAuth('http://localhost:3500/api/admins')
+    .then(res => {
+      if (!res.ok) throw new Error('Unauthorized');
+      return res.json();
+    })
+    .then(data => {
+      if (data.admin.role !== 'superadmin') {
+        alert('Only superadmins can create new admins');
+        return;
+      }
+      showCreateAdminForm();
+    })
+    .catch(() => {
+      alert('Unauthorized');
+    });
+  content.innerHTML = `
+    <div class="card">
+      <h2>Create Admin</h2>
+      <div class="input-group">
+        <i class="fa fa-user"></i>
+        <input type="text" id="newUsername" placeholder="Username">
+      </div>
+      <div class="input-group">
+        <i class="fa fa-envelope"></i>
+        <input type="email" id="newEmail" placeholder="Email">
+      </div>
+      <div class="input-group">
+        <i class="fa fa-key"></i>
+        <input type="password" id="newPassword" placeholder="Password">
+      </div>
+      <button onclick="submitCreateAdmin()">Create Admin</button>
+    </div>
+  `;
+}
+
+
+checkAuth();
+</script>
+</html>
