@@ -3,8 +3,9 @@ const router = express.Router();
 const db = require('../database');
 const bcrypt = require('bcryptjs')
 const SECRET = process.env.SESSION_SECRET || 'your_secret_key';
-
 const jwt = require('jsonwebtoken');
+
+
 
 module.exports.getAllPatients = (req, res) => {
   const sql = 'SELECT id, first_name, last_name, email, phone, date_of_birth, gender, address  FROM patients';
@@ -112,24 +113,37 @@ module.exports.loginPatient = (req, res) => {
   const { email, password } = req.body;
 
   const sql = 'SELECT * FROM patients WHERE email = ?';
-  db.query(sql, [email], async (err, result) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
-    if (result.length === 0) return res.status(401).json({ message: 'Invalid email or password' });
-
-    const patient = result[0];
-    const passwordMatch = await bcrypt.compare(password, patient.password_hash);
-    if (!passwordMatch) return res.status(401).json({ message: 'Invalid email or password' });
+  db.query(sql, [email], (err, results) => {
+    if (err) {
+      console.error('Error fetching patient: ', err);
+      return res.status(500).json({ error: 'Database error' });
+    } else if (results.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    const patient = results[0];
+    const isPasswordValid = bcrypt.compareSync(password, patient.password_hash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+  
+   // Create Token
+   const token = jwt.sign({ id: patient.id, email: patient.email }, SECRET, { expiresIn: '1h' });
+   res.json({ success: true, token, patient: { id: patient.id, first_name: patient.first_name, last_name: patient.last_name, email: patient.email } });
   });
-
-  const token = jwt.sign({ id: patient.id, email: patient.email }, SECRET, { expiresIn: '1h' });
-  res.json({ token });
+ 
 }
 
+module.exports.getProfile = (req, res) => {
+  const patientID = req.user.id;
+  const sql = 'SELECT id, first_name, last_name, email, phone, date_of_birth, gender, address FROM patients WHERE id = ?';
+  db.query(sql, [patientID], (err, results) => {
+    if (err) {
+      console.error('Error fetching patient profile: ', err);
+      return res.status(500).json({ error: 'Failed to fetch profile' });
+    } else if (results.length === 0) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+    res.json(results[0]);
 
-module.exports.logoutPatient = (req, res) => {
-  // For JWT, logout is handled on the client by deleting the token
-  res.json({ message: 'Logged out successfully' });
+});
 }
-
-
-

@@ -151,6 +151,9 @@ fetch('http://localhost:3500/api/doctors')
 form.addEventListener('submit', function(e) {
   e.preventDefault();
 
+  fetch('http://localhost:3500/api/doctors', {
+    
+  })
   const doctorId = parseInt(document.getElementById('doctor_id').value);
   const date = document.getElementById('appointment_date').value;
   const time = document.getElementById('appointment_time').value;

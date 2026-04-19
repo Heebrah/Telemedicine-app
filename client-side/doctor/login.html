@@ -198,8 +198,8 @@ form.addEventListener('submit', async (e)=>{
       if(data.error){
         alert(data.error);
       } else {
-        localStorage.setItem('user', JSON.stringify(data));
-        window.location.href = "profile.html";
+        localStorage.setItem('doctorToken', JSON.stringify(data));
+        window.location.href = "dashboard.html";
       }
     })
   }

@@ -17,7 +17,7 @@ module.exports.createAppointment = (req, res) => {
 
   db.query(
     sql,
-    [patient_id, doctor_id, appointment_date, appointment_time, status || 'scheduled'],
+    [patient_id, doctor_id, appointment_date, appointment_time, status || 'pending'],
     (err, result) => {
 
       if (err) {
@@ -37,7 +37,7 @@ module.exports.createAppointment = (req, res) => {
           doctor_id,
           appointment_date,
           appointment_time,
-          status: status || 'scheduled'
+          status: status || 'pending'
         }
       });
     }
@@ -89,3 +89,30 @@ module.exports.deleteAppointment =  (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+module.exports.getAppointmentsByDoctor = (req, res) => {
+  const doctorId = req.params.doctorId;
+  const sql = 'SELECT a.id, p.first_name AS patient_first_name, p.last_name AS patient_last_name, a.appointment_date, a.appointment_time, a.status FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ?';
+  db.query(sql, [doctorId], (err, results) => {
+    if (err) {
+      console.error('Error fetching appointments: ', err);
+      return res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json({length: results.length, appointments: results });
+    }
+  });
+}
+
+module.exports.getAppointmentsByPatient = (req, res) => {
+  const patientId = req.params.patientId;
+  const sql = 'SELECT a.id, d.first_name AS doctor_first_name, d.last_name AS doctor_last_name, a.appointment_date, a.appointment_time, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id WHERE a.patient_id = ?';
+  db.query(sql, [patientId], (err, results) => {
+    if (err) {
+      console.error('Error fetching appointments: ', err);
+      return res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json({length: results.length, appointments: results });
+    }
+  });
+}
+

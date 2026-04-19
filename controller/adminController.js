@@ -2,14 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database');
 const bcrypt = require('bcryptjs')
-const session = require('express-session');
-const middleware = require('../middleware/auth');
 const SECRET = process.env.SESSION_SECRET || 'your_secret_key';
-
 const jwt = require('jsonwebtoken');
-
-
-
 
 
 
@@ -59,23 +53,19 @@ module.exports.createAdmin = (req, res) => {
   }
 
   const checkSql = 'SELECT id FROM admins WHERE username = ?';
-  db.query(checkSql, [username], (err, results) => {
-    if (err) {
-      console.error('Error checking admin: ', err);
-      return res.status(500).json({ error: 'Failed to check admin' });
-    }
-    if (results.length > 0) {
-      return res.status(400).json({ error: 'Username already exists' });
-    }
-  });
-  
+ db.query(checkSql, [username], (err, results) => {
+  if (err) return res.status(500).json({ error: 'Failed to check admin' });
+
+  if (results.length > 0) {
+    return res.status(400).json({ error: 'Username already exists' });
+  }
+
   db.query(sql, [username, role, password_hash], (err, result) => {
-    if (err) {  
-      console.error('Error creating admin: ', err);
-      return res.status(500).json({ error: 'Failed to create admin' });
-    } 
+    if (err) return res.status(500).json({ error: 'Failed to create admin' });
+
     res.status(201).json({ id: result.insertId, username, role: role || 'editor' });
   });
+});
 }
 
 module.exports.updateAdmin = (req, res) => {
@@ -83,7 +73,7 @@ module.exports.updateAdmin = (req, res) => {
   const { username, role } = req.body;
   
   const sql = 'UPDATE admins SET username = ?, role = ?,  WHERE id = ?';
-  db.query(sql, [username, role,, adminId], (err, result) => {  
+  db.query(sql, [username, role, adminId], (err, result) => {  
     if (err) {
       console.error('Error updating admin: ', err);
       return res.status(500).json({ error: 'Failed to update admin' });
@@ -137,23 +127,20 @@ module.exports.loginAdmin = (req, res) => {
   });
 };
 
-module.exports.logoutAdmin = (req, res) => {
-  // For JWT, logout is handled on the client by deleting the token
-  res.json({ message: 'Logged out successfully' });
-};
+
 
 
 module.exports.getProfile = (req, res) => {
-  const adminId = req.admin.id;
+  const adminId = req.user.id;
   const sql = 'SELECT id, username, role FROM admins WHERE id = ?';
-  db.query(sql, [adminId], (err, results) => {
+  db.query(sql, [adminId], (err, result) => {
     if (err) {
       console.error('Error fetching admin profile: ', err);
       return res.status(500).json({ error: 'Failed to fetch profile' });
-    }
-    if (results.length === 0) {
+    } else if (result.length === 0) {
       return res.status(404).json({ error: 'Admin not found' });
-    } 
-    res.json(results[0]);
-  });
+    }
+    res.json(result[0]);
+
+});
 }

@@ -2,7 +2,9 @@
 const router = express.Router();
 const db = require('../database');
 const bcrypt = require('bcryptjs');
-const e = require('express');
+const SECRET = process.env.SESSION_SECRET || 'your_secret_key';
+const jwt = require('jsonwebtoken');
+
 
 module.exports.getAllDoctor = (req, res) => {
   const sql = 'SELECT * FROM doctors';
@@ -73,6 +75,21 @@ module.exports.createDoctor = (req, res) => {
   });
 };
 
+module.exports.updateDoctor = (req, res) => {
+  const doctorId = req.params.id;
+  const { phone, schedule } = req.body;
+  const sql = 'UPDATE doctors SET phone = ?, schedule = ? WHERE id = ?';
+  db.query(sql, [phone, schedule, doctorId], (err, result) => {
+    if (err) {
+      console.error('Error updating doctor: ', err);
+      return res.status(500).json({ error: 'Database error' });
+    } else if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+    res.json({ id: doctorId, phone, schedule });
+  });
+}
+
 
 
 // login doctor
@@ -93,7 +110,37 @@ module.exports.loginDoctor = (req, res) => {
     const isPasswordValid = bcrypt.compareSync(password, doctor.password_hash)  
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid email or password' })
-    } else {
-      res.json({ success: true, doctor: { id: doctor.id, first_name: doctor.first_name, last_name: doctor.last_name, email: doctor.email, specialisation: doctor.specialisation, phone: doctor.phone, schedule: doctor.schedule } })
-    } })
+    }
+
+    const token = jwt.sign({ id: doctor.id }, SECRET, { expiresIn: '1h' })
+    res.json({ success: true, token: token })
+  })
+}
+
+module.exports.getProfile = (req, res) => {
+  const doctorId = req.user.id;
+  const sql = 'SELECT id, first_name, last_name, email, specialization, phone, schedule FROM doctors WHERE id = ?';
+  db.query(sql, [doctorId], (err, results) => {
+    if (err) {
+      console.error('Error fetching doctor profile: ', err);
+      return res.status(500).json({ error: 'Database error' });
+    } else if (results.length === 0) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+    res.json(results[0]);
+  });
+}
+
+module.exports.deleteDoctor = (req, res) => {
+  const doctorId = req.params.id;
+  const sql = 'DELETE FROM doctors WHERE id = ?';
+  db.query(sql, [doctorId], (err, result) => {
+    if (err) {
+      console.error('Error deleting doctor: ', err);
+      return res.status(500).json({ error: 'Database error' });
+    } else if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }   
+    res.json({ delete: doctorId, success: true });
+  });
 }

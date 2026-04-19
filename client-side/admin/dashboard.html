@@ -202,7 +202,7 @@
 
 </body>
 <script>
-  const content = document.getElementById('content');
+const content = document.getElementById('content');
 let admin = null;
 const token = localStorage.getItem('token');
 
@@ -222,7 +222,7 @@ async function checkAuth() {
     if (!res.ok) return redirectLogin();
 
     const data = await res.json();
-    admin = data.admin;
+    admin = data;
 
     // Load profile by default
     loadProfile();
@@ -291,6 +291,7 @@ content.innerHTML = `
     <p><strong>Role:</strong> ${a.role}</p>
   </div>
 `;
+
 
   } catch {
     content.innerHTML = 'Error loading profile';

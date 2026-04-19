@@ -191,7 +191,8 @@
   if (data.success) {
 
     // THIS is frontend (browser)
-    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('patientToken', data.token);
+    
 
     window.location.href = "patient.html";
 

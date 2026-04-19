@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: url('https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGRvY3RvcnxlbnwwfHwwfHx8MA%3D%3D') no-repeat center/cover;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Overlay for dark effect */
+    body::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.65);
+      z-index: 0;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      color: #fff;
+    }
+
+    .navbar h2 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* Glass Card */
+    .card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(14px);
+      border-radius: 16px;
+      padding: 25px;
+      color: #fff;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      margin-bottom: 25px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .card h3 {
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .box {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 25px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .box i {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .box:hover {
+      transform: translateY(-6px) scale(1.02);
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* Form */
+    .form-container {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #38bdf8;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .form-container button:hover {
+      background: #0ea5e9;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+  <h2><i class="fa fa-user-doctor"></i> Doctor Dashboard</h2>
+ 
+    <button onclick="logout()" class="logout-btn">Logout</button>
+ 
+</div>
+
+<div class="container">
+
+  <!-- Profile -->
+  <div id="profile" class="card"></div>
+
+  <!-- Actions -->
+  <div class="grid">
+    <div class="box" onclick="checkAppointment(), showsection('appointments')">
+      <i class="fa fa-calendar-check"></i>
+      <p>Check Appointments</p>
+    </div>
+
+    <div class="box" onclick="toggleForm(), showsection('formBox')">
+      <i class="fa fa-user-pen"></i>
+      <p>Update Profile</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div id="formBox" class="card form-container">
+    <h3>Update Profile</h3>
+    <input type="text" id="phone" placeholder="Phone Number">
+    <input type="datetime-local" id="schedule">
+    <button onclick="submitProfileUpdate()">Save Changes</button>
+  </div>
+
+</div>
+<div id="appointments" class="card form-container"></div>
+
+<script>
+
+
+const doctorToken = JSON.parse(localStorage.getItem('doctorToken'));
+const doctorId = doctorToken ? JSON.parse(atob(doctorToken.token.split('.')[1])).id : null;
+
+window.onload = () => {
+  if (!doctorToken) 
+  return location.href="login.html";
+
+}
+
+// Fetch and display doctor profile
+  fetch('http://localhost:3500/api/doctors/profile', {
+    headers: {
+      'Authorization': `Bearer ${doctorToken.token}`
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('profile').innerHTML = `
+    <div>
+      <h3>Profile</h3>
+      <p><strong>Name:</strong> ${data.first_name} ${data.last_name}</p>
+      <p><strong>Email:</strong> ${data.email}</p>
+      <p><strong>Specialization:</strong> ${data.specialization}</p>
+    `;
+  });
+
+
+
+// Toggle form visibility
+function toggleForm() {
+  const form = document.getElementById('formBox');
+  form.style.display = form.style.display === 'block' ? 'none' : 'block';
+}
+
+// Fetch and display appointments
+function checkAppointment() {
+  fetch(`http://localhost:3500/api/doctors/${doctorId}/appointments`, {
+    headers: {
+      'Authorization': `Bearer ${doctorToken.token}`
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const myappoint = data.appointments
+    console.log(myappoint)
+    document.getElementById('appointments').innerHTML = `
+      <h3>Appointments</h3>
+      ${myappoint.length > 0 ? myappoint.map(app => `
+        <div>
+          <p><strong>Patient:</strong> ${app.patient_first_name} ${app.patient_last_name}</p>
+          <p><strong>Date:</strong> ${app.appointment_date}</p>
+          <p><strong>Status:</strong> ${app.status}</p>
+          <button onclick="updateAppointmentStatus('${app.id}', 'scheduled')">Mark as Scheduled</button>
+        </div>
+      `).join('') : '<p>No appointments found.</p>'}
+    `;
+  });
+}
+
+
+// Update appointment status
+function submitProfileUpdate() {
+  const phone = document.getElementById('phone').value;
+  const schedule = document.getElementById('schedule').value;
+
+  fetch(`http://localhost:3500/api/doctors/${doctorId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${doctorToken.token}`
+    },
+    body: JSON.stringify({ phone, schedule })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert('Updated successfully');
+    location.reload();
+  });
+}
+
+const logout = ()=> {
+localStorage.removeItem('doctorToken')
+window.location.href = "login.html"
+}
+
+function showsection(sectionId) {
+  const sections = ['appointments', 'formBox'];
+  sections.forEach(id => {
+    document.getElementById(id).style.display = id === sectionId ? 'block' : 'none';
+  });
+}
+
+
+</script>
+
+</body>
+</html>

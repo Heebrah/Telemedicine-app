@@ -3,11 +3,12 @@
 ###
 GET http://localhost:3500/api/patients
 
-
 ###
-GET http://localhost:3500/api/patients/4
-
-
+GET http://localhost:3500/api/patients/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzc1OTI2NTQ4LCJleHAiOjE3NzU5MzAxNDh9.LynYkgOdPQhG2cutQZgV2ohJmXCbJR9ZPohtcDoZlPw
+###
+GET http://localhost:3500/api/patients/profile/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzc1OTI2NTQ4LCJleHAiOjE3NzU5MzAxNDh9.LynYkgOdPQhG2cutQZgV2ohJmXCbJR9ZPohtcDoZlPw
 ###
 POST http://localhost:3500/api/patients
 Content-Type: application/json
@@ -49,16 +50,17 @@ Content-Type: application/json
   "password": "345566"
 }
 
-###
-GET http://localhost:3500/api/patients/login
+### 
+GET http://localhost:3500/api/patients/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzc2MDc1NzkwLCJleHAiOjE3NzYwNzkzOTB9.HPhsoOMSh2_0p_E2SokTmcFysiA00jxOIjRq5mQs-Po
 
 
 
 ### Doctor routes
 
-
 ###
 GET http://localhost:3500/api/doctors
+
 ###
 GET http://localhost:3500/api/doctors/8
 
@@ -80,15 +82,34 @@ Content-Type: application/json
    "last_name":"Pauline",
    "email":"kaypaul@gmail.com",
    "password":"password123",
-   "specialisation":"surgeon",
-   "phone":"9034802123",
+   "specialization":"surgeon",
+   "phone":"9034802123", 
    "schedule":"2026-03-01 13:17:11"
 }
+
+###
+DELETE http://localhost:3500/api/doctors/18
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjIsImlhdCI6MTc3NjQ0NzUyNiwiZXhwIjoxNzc2NDUxMTI2fQ.GR98uuVLOuqpdfnHnGS1jUoNR_v63EbON0lIRMUIaDY
+
+###
+PATCH http://localhost:3500/api/doctors/16
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjIsImlhdCI6MTc3NjE3MjU5MCwiZXhwIjoxNzc2MTc2MTkwfQ.65XdCY74RZTW0y1f4jTaNYWEktNcRHa_Gkedclnxuo8
+
+{
+   "phone":"0803402123",
+   "schedule":"2026-03-01 13:17:11"
+}
+
+### 
+GET http://localhost:3500/api/doctors/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjIsImlhdCI6MTc3NjE1NzMwMiwiZXhwIjoxNzc2MTYwOTAyfQ.rmt0HTLdjE0O2FRSvQltOIXK9x-yzDz6pAWiRZSZDgE
 
 
 
 
 ### appointments
+
 POST http://localhost:3500/api/appointments
 Content-Type: application/json
 
@@ -108,22 +129,32 @@ GET http://localhost:3500/api/appointments/1
 
 ###
 DELETE http://localhost:3500/api/appointments/27
+
 ###
-PATCH http://localhost:3500/api/appointments/2
+PATCH http://localhost:3500/api/appointments/7
 Content-Type: application/json
 
 {
-  "patient_id": 3,
-  "doctor_id": 17,
-  "appointment_date": "2026-03-05",
-  "appointment_time": "10:50:00",
-  "status": "completed"
+    "status": "completed"
 }
 
-### Admin routes
-GET http://localhost:3500/api/admins
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbjEiLCJyb2xlIjoic3VwZXJhZG1pbiIsImlhdCI6MTc3NTczNDcwMywiZXhwIjoxNzc1NzM4MzAzfQ.Zw5FxnZWlwV6vTUfmLjkrFI40SvKrhcKJvKGc4P7Cgg
 
+### Doctors appointments
+GET http://localhost:3500/api/doctors/17/appointments
+
+
+### Patients appointments
+GET http://localhost:3500/api/patients/2/appointments
+
+
+
+### Admin routes
+
+GET http://localhost:3500/api/admins
+
+
+GET http://localhost:3500/api/admins/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbjEiLCJyb2xlIjoic3VwZXJhZG1pbiIsImlhdCI6MTc3NjA3NzQ5OSwiZXhwIjoxNzc2MDgxMDk5fQ.qIZfmnIa1P-p7DtFSAB-NdUjCbfE1RSpBNnPZ2qmcTU
 ###
 GET http://localhost:3500/api/admins/1
 
@@ -159,6 +190,5 @@ Content-Type: application/json
   "email": "updatedadmin@example.com"
 }
 
-### 
-GET http://localhost:3500/api/patients/profile
+
 
