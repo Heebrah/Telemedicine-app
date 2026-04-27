@@ -205,10 +205,8 @@ window.onload = () => {
   if (!doctorToken) 
   return location.href="login.html";
 
-}
-
-// Fetch and display doctor profile
-  fetch('http://localhost:3500/api/doctors/profile', {
+  else{
+     fetch('http://localhost:3500/api/doctors/profile', {
     headers: {
       'Authorization': `Bearer ${doctorToken.token}`
     }
@@ -225,6 +223,12 @@ window.onload = () => {
   });
 
 
+  }
+
+}
+
+// Fetch and display doctor profile
+ 
 
 // Toggle form visibility
 function toggleForm() {
