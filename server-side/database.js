@@ -1,30 +1,32 @@
 // import package
 const mysql = require('mysql2')
 require('dotenv').config()
+const fs = require('fs')
 
 
 
-const db = mysql.createPool({
+
+
+const db = mysql.createConnection({
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0 
-});
-
-
-
-
-db.query('SELECT 1', (err, results) => {
-  if (err) {
-    console.error('Database connection failed:', err);
-  } else {
-    console.log('Database connected successfully');
+  ssl: {
+    ca: fs.readFileSync(process.env.CA)
   }
 });
+
+
+
+db.connect(err =>{
+  if (err) {
+    console.error('Error connecting to MySQL', err)
+    return
+  }
+  console.log('connected to Mysql')
+  
+})
 
 
 module.exports = db;
