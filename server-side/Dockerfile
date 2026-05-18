@@ -1,7 +1,5 @@
 FROM node:25-alpine
 
-RUN npm install -g nodemon
-
 WORKDIR /app
 
 COPY package.json .
