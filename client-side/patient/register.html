@@ -188,6 +188,9 @@
   </form>
 </body>
 <script>
+  // local api
+  // const renderApi = 'http://localhost:3500'
+  const renderApi = 'https://telemedicine-app-p6ea.onrender.com'
   const form = document.querySelector('form');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -201,7 +204,7 @@
     gender: form.querySelector('[name="gender"]').value,
     address: form.querySelector('[name="address"]').value
     };
-    fetch('http://localhost:3500/api/patients', {
+    fetch(`${renderApi}/api/patients`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

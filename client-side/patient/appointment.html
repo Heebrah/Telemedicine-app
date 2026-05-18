@@ -126,6 +126,9 @@
 </body>
 
 <script>
+ // local api
+  // const renderApi = 'http://localhost:3500'
+  const renderApi = 'https://telemedicine-app-p6ea.onrender.com'
   const form = document.getElementById('appointmentForm');
 const user = JSON.parse(localStorage.getItem('user'));
 
@@ -134,7 +137,7 @@ if (!user) {
 }
 
 // LOAD DOCTORS
-fetch('http://localhost:3500/api/doctors')
+fetch(`${renderApi}/api/doctors`)
   .then(res => res.json())
   .then(data => {
     const select = document.getElementById('doctor_id');
@@ -151,7 +154,7 @@ fetch('http://localhost:3500/api/doctors')
 form.addEventListener('submit', function(e) {
   e.preventDefault();
 
-  fetch('http://localhost:3500/api/doctors', {
+  fetch(`${renderApi}/api/doctors`, {
     
   })
   const doctorId = parseInt(document.getElementById('doctor_id').value);
@@ -167,7 +170,7 @@ form.addEventListener('submit', function(e) {
 
   console.log({ doctorId, date, formattedTime });
 
-  fetch('http://localhost:3500/api/appointments', {
+  fetch(`${renderApi}/api/appointments`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

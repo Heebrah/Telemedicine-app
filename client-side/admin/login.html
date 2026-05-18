@@ -118,6 +118,9 @@
   </div>
 </body>
 <script>
+// local api
+  // const renderApi = 'http://localhost:3500'
+  const renderApi = 'https://telemedicine-app-p6ea.onrender.com'
 const form = document.querySelector('form');
 
 form.addEventListener('submit', async (e) => {
@@ -128,7 +131,7 @@ form.addEventListener('submit', async (e) => {
   if (!username || !password) return alert('Username and password required');
 
   try {
-    const res = await fetch('http://localhost:3500/api/admins/login', {
+    const res = await fetch(`${renderApi}/api/admins/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })

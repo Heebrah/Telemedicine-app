@@ -202,6 +202,9 @@
 
 </body>
 <script>
+// local api
+  // const renderApi = 'http://localhost:3500'
+  const renderApi = 'https://telemedicine-app-p6ea.onrender.com'
 const content = document.getElementById('content');
 let admin = null;
 const token = localStorage.getItem('token');
@@ -215,7 +218,7 @@ async function checkAuth() {
   if (!token) return redirectLogin();
 
   try {
-    const res = await fetch('http://localhost:3500/api/admins/profile', {
+    const res = await fetch(`${renderApi}/api/admins/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -279,7 +282,7 @@ function renderTable(headers, rows) {
 async function loadProfile() {
   showLoading();
   try {
-    const res = await fetchWithAuth('http://localhost:3500/api/admins/profile');
+    const res = await fetchWithAuth(`${renderApi}/api/admins/profile`);
     if (!res.ok) throw new Error('Failed to load profile');
 
     const data = await res.json();
@@ -304,7 +307,7 @@ content.innerHTML = `
 async function loadAdmins() {
   showLoading();
   try {
-    const res = await fetchWithAuth('http://localhost:3500/api/admins');
+    const res = await fetchWithAuth(`${renderApi}/api/admins`);
     if (!res.ok) throw new Error('Failed to load admins');
     const data = await res.json();
 
@@ -326,7 +329,7 @@ async function loadAdmins() {
 async function deleteAdmin(id) {
   if (!confirm('Delete this admin?')) return;
   try {
-    await fetchWithAuth(`http://localhost:3500/api/admins/${id}`, { method: 'DELETE' });
+    await fetchWithAuth(`${renderApi}/api/admins/${id}`, { method: 'DELETE' });
     loadAdmins();
   } catch {
     alert('Delete failed');
@@ -339,7 +342,7 @@ async function deleteAdmin(id) {
 async function loadPatients() {
   showLoading();
   try {
-    const res = await fetchWithAuth('http://localhost:3500/api/patients');
+    const res = await fetchWithAuth(`${renderApi}/api/patients`);
     if (!res.ok) throw new Error('Failed to load patients');
     const data = await res.json();
     const patients = data.patients;
@@ -365,7 +368,7 @@ async function loadPatients() {
 async function loadDoctors() {
   showLoading();
   try {
-    const res = await fetchWithAuth('http://localhost:3500/api/doctors');
+    const res = await fetchWithAuth(`${renderApi}/api/doctors`);
     if (!res.ok) throw new Error('Failed to load doctors');
     const data = await res.json();
 
@@ -390,7 +393,7 @@ async function loadDoctors() {
 async function loadAppointments() {
   showLoading();
   try {
-    const res = await fetchWithAuth('http://localhost:3500/api/appointments');
+    const res = await fetchWithAuth(`${renderApi}/api/appointments`);
     if (!res.ok) throw new Error('Failed to load appointments');
     const data = await res.json();
     const appointments = data.appointments;
@@ -424,7 +427,7 @@ function logout() {
 // ------------------------
 
 function createAdmin() {
-  fetchWithAuth('http://localhost:3500/api/admins')
+  fetchWithAuth(`${renderApi}/api/admins`)
     .then(res => {
       if (!res.ok) throw new Error('Unauthorized');
       return res.json();

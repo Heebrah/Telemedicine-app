@@ -138,8 +138,8 @@
 
 <body>
   <div class="card">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-        <a href="../patient/login.html"><button>Patient</button></a>
+      <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        
         <a href="../doctor/login.html"><button>Doctor</button></a>
       </div>
   <form  method="POST">
@@ -173,10 +173,13 @@
 </body>
 
 <script>
+ // local api
+  // const renderApi = 'http://localhost:3500'
+  const renderApi = 'https://telemedicine-app-p6ea.onrender.com'
   const form = document.querySelector('form');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    fetch('http://localhost:3500/api/patients/login', {
+    fetch(`${renderApi}/api/patients/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

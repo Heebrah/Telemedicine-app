@@ -197,7 +197,9 @@
 
 <script>
 
-
+// local api
+  // const renderApi = 'http://localhost:3500'
+  const renderApi = 'https://telemedicine-app-p6ea.onrender.com'
 const doctorToken = JSON.parse(localStorage.getItem('doctorToken'));
 const doctorId = doctorToken ? JSON.parse(atob(doctorToken.token.split('.')[1])).id : null;
 
@@ -206,7 +208,7 @@ window.onload = () => {
   return location.href="login.html";
 
   else{
-     fetch('http://localhost:3500/api/doctors/profile', {
+     fetch(`${renderApi}/api/doctors/profile`, {
     headers: {
       'Authorization': `Bearer ${doctorToken.token}`
     }
@@ -238,7 +240,7 @@ function toggleForm() {
 
 // Fetch and display appointments
 function checkAppointment() {
-  fetch(`http://localhost:3500/api/doctors/${doctorId}/appointments`, {
+  fetch(`${renderApi}/api/doctors/${doctorId}/appointments`, {
     headers: {
       'Authorization': `Bearer ${doctorToken.token}`
     }
@@ -267,7 +269,7 @@ function submitProfileUpdate() {
   const phone = document.getElementById('phone').value;
   const schedule = document.getElementById('schedule').value;
 
-  fetch(`http://localhost:3500/api/doctors/${doctorId}`, {
+  fetch(`${renderApi}/api/doctors/${doctorId}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
