@@ -2,7 +2,7 @@ version: '4.0'
 services:
   api:
     build: ./server-side
-    container_name: telemeds_contain
+    container_name: telemeds_contain:v1
     ports:
       - "3000:3500"
     volumes:
