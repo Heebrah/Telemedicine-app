@@ -4,7 +4,7 @@ services:
     build: ./server-side
     container_name: telemeds_container
     ports:
-      - "3000:3500"
+      - "3000:3000"
     volumes:
         - ./server-side:/app
         - /app/node_modules
