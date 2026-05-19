@@ -16,9 +16,22 @@ const port = 3500;
 app.use((req, res, next) => { req.verifyToken = verifyToken; next(); });
 
 // CORS: allow your frontend origin with credentials
+
+
+const allowedOrigins = [
+  'http://127.0.0.1:5500',
+  'https://telemedicine-mwpehltqv-ibrahim-techie.vercel.app'
+];
+
 app.use(cors({
-  origin: 'http://127.0.0.1:5500',
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS policy blocked this origin.'), false);
+    }
+    return callback(null, true);
+  }
 }));
 
 app.use(express.json());
