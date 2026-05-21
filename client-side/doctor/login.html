@@ -156,6 +156,7 @@
       <i class="fa fa-lock"></i>
       <input type="password" id="password" placeholder="Password" required>
     </div>
+    <p style="color: #ef4444;" id="error-message"></p>
 
     <div class="options">
       <label>
@@ -197,7 +198,7 @@ form.addEventListener('submit', async (e)=>{
     .then(res => res.json())
     .then(data => {
       if(data.error){
-        alert(data.error);
+        document.getElementById('error-message').textContent = data.error;
       } else {
         localStorage.setItem('doctorToken', JSON.stringify(data));
         window.location.href = "dashboard.html";
@@ -206,7 +207,7 @@ form.addEventListener('submit', async (e)=>{
   }
   catch(err){
     console.error('Login error: ', err);
-    alert('An error occurred during login. Please try again.');
+    document.getElementById('error-message').textContent = 'An error occurred during login. Please try again.';
   } 
 })
 </script>

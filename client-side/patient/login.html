@@ -156,7 +156,7 @@
       <i class="fa fa-lock"></i>
       <input type="password" id="password" placeholder="Password" required>
     </div>
-
+    <p style="color: #ef4444;" id="error-message"></p>
     <div class="options">
       <label>
         <input type="checkbox"> Remember me
@@ -200,7 +200,7 @@
     window.location.href = "patient.html";
 
   } else {
-    alert('Login failed: ' + data.message);
+    document.getElementById('error-message').textContent = data.error;
   }
 })
   });
