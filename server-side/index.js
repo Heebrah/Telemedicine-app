@@ -20,7 +20,8 @@ app.use((req, res, next) => { req.verifyToken = verifyToken; next(); });
 
 const allowedOrigins = [
   'http://127.0.0.1:5500',
-  'https://telemedicine-mwpehltqv-ibrahim-techie.vercel.app'
+  'https://telemedicine-mwpehltqv-ibrahim-techie.vercel.app',
+  'https://telemedicine-oaq3lp31a-ibrahim-techie.vercel.app'
 ];
 
 app.use(cors({
