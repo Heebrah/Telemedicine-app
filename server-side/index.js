@@ -74,5 +74,5 @@ app.get('/', (req, res) => {
 // });
 
 app.listen(port, () => {
-  console.log(`check your localhost at http://localhost:${port}`);
+  console.log(`application is running at http://localhost:${port}`);
 });
